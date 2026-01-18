@@ -1,10 +1,13 @@
 import express from "express";
-import auth from "../middleware/auth.js";
-import aiLimiter from "../middleware/aiLimiter.js";
-import { submitAnswer } from "../controllers/interviewController.js";
+import protect from "../middleware/authMiddleware.js";
+import {
+  submitAnswer,
+  getInterviewSummary
+} from "../controllers/interviewController.js";
 
 const router = express.Router();
 
-router.post("/submit", auth, aiLimiter, submitAnswer);
+router.post("/submit", protect, submitAnswer);
+router.get("/summary", protect, getInterviewSummary);
 
 export default router;

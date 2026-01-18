@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import api from "../services/api";
+import api from "../utils/axiosInstance";
+
 import {
   startEvaluation,
   evaluationSuccess,
