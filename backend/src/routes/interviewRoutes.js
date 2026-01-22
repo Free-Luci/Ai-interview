@@ -8,6 +8,6 @@ import {
 const router = express.Router();
 
 router.post("/submit", protect, submitAnswer);
-router.get("/summary", protect, getInterviewSummary);
+// router.get("/summary", protect, getInterviewSummary);
 
 export default router;

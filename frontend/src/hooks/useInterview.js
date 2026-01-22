@@ -12,7 +12,14 @@ const useInterview = () => {
   const dispatch = useDispatch();
   const interviewState = useSelector((state) => state.interview);
 
-  const submitAnswer = async ({ role, topic, question, answer }) => {
+  const submitAnswer = async ({ role,
+     topic, 
+     question,
+      questionIndex,
+    answer,
+    autoSubmitted = false,
+    autoSubmitReason = null
+   }) => {
     if (!answer || answer.trim().length < 20) {
       dispatch(evaluationFailure("Answer must be at least 20 characters"));
       return;
@@ -21,19 +28,44 @@ const useInterview = () => {
     dispatch(startEvaluation());
 
     try {
-      const res = await api.post("/interview/submit", {
+      const payload={
+  
         role,
         topic,
         question,
-        answer
-      });
+        questionIndex,
+        answer,
+        autoSubmitted,
+        autoSubmitReason,
+      }
+  //   console.log("✅ BACKEND RESPONSE:", res.data);
+
+  //     dispatch(evaluationSuccess(res.data.feedback));
+  //   } catch (err) {
+  //   console.error("❌ AXIOS ERROR:", err.response?.data || err.message);
+
+  //     dispatch(
+  //       evaluationFailure(
+  //         err.response?.data?.message ||
+  //           "AI service temporarily unavailable"
+  //       )
+  //     );
+  //   }
+  // };
+   console.log("🚀 AXIOS SENDING PAYLOAD:", payload);
+
+      const res = await api.post("/api/interview/submit", payload);
+
+      console.log("✅ BACKEND RESPONSE:", res.data);
 
       dispatch(evaluationSuccess(res.data.feedback));
     } catch (err) {
+      console.error("❌ AXIOS ERROR:", err.response?.data || err.message);
+
       dispatch(
         evaluationFailure(
           err.response?.data?.message ||
-            "AI service temporarily unavailable"
+          "AI service temporarily unavailable"
         )
       );
     }

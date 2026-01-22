@@ -5,6 +5,7 @@ import { validateAIResponse } from "../services/aiValidator.js";
 
 export const submitAnswer = async (req, res, next) => {
   try {
+    console.log("🔥 FULL BODY RECEIVED:", req.body);
     const {
       role,
       topic,
@@ -15,6 +16,9 @@ export const submitAnswer = async (req, res, next) => {
       autoSubmitReason = null,
     } = req.body;
 
+      const parsedQuestionIndex = Number(questionIndex);
+
+    console.log("✅ PARSED questionIndex:", parsedQuestionIndex);
     // 🔍 DEBUG (safe to keep during dev)
     console.log("DEBUG questionIndex:", questionIndex);
 
