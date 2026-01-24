@@ -86,12 +86,13 @@ const startCountdown = useCallback(() => {
 
   countdownIntervalRef.current = setInterval(() => {
     setLeaveCountdown((prev) => {
-      console.log("⏱ Countdown:", prev - 1);
+      console.log("⏱ Countdown:", prev -1);//
 
       if (prev <= 1) {
         // Time finished
         clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = null;
+          // setShowLeaveWarning(false); //
 
         if (!autoSubmittedRef.current) {
           console.log("🚨 Auto submitting due to TAB SWITCH");

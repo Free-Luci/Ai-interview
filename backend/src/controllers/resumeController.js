@@ -7,12 +7,11 @@ const pdf = require("pdf-parse");
 
 export const analyzeResume = async (req, res) => {
     try {
-        console.log("OPENAI KEY:", process.env.OPENAI_API_KEY);
     
         const openai = new OpenAI({
             apiKey:process.env.OPENAI_API_KEY,
         });
-    console.log("FILES RECEIVED:", req.files);
+    // console.log("FILES RECEIVED:", req.files);
 
     if (!req.files || req.files.length === 0) {
     return res.status(400).json({
@@ -33,25 +32,30 @@ export const analyzeResume = async (req, res) => {
     // 🔹 Parse PDF
     const data = await pdf(file.buffer);
     const resumeText = data.text;
+    
+    const role=req.body.role || "Software Engineer";
 
     // 🔹 SEND TO OPENAI
-    const prompt = `
+const prompt = `
 You are an expert technical recruiter and resume reviewer.
 
-Analyze the following resume text and return STRICT JSON in this format:
+Target Job Role: ${role}
+
+Analyze the following resume specifically for the above role and return STRICT JSON in this format:
 
 {
   "score": number (0-100),
-  "strengths": [list of strengths],
-  "improvements": [list of improvement suggestions],
-  "missingSkills": [important missing technical skills],
-  "atsTips": [tips to improve ATS score],
-  "summary": "short professional evaluation"
+  "strengths": [list of strengths relevant to this role],
+  "improvements": [list of role-specific improvement suggestions],
+  "missingSkills": [important missing technical skills for this role],
+  "atsTips": [tips to improve ATS score for this role],
+  "summary": "short professional evaluation focused on this role"
 }
 
 Resume Text:
 ${resumeText.slice(0, 4000)}
 `;
+
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",   // fast & cheap
