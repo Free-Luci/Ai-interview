@@ -1,6 +1,6 @@
-import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
+import express from "express";
 // console.log("ENV CHECK:", process.env.OPENAI_API_KEY);
 
 import cors from "cors";
@@ -10,9 +10,10 @@ import cookieParser from "cookie-parser";
 import globalLimiter from "./middleware/globalLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 
-// Routes (we will create these next)
+// Routes 
 import authRoutes from "./routes/authRoutes.js";
 import interviewRoutes from "./routes/interviewRoutes.js";
+import resumeRoutes from "./routes/resumeRoutes.js";
 
 
 
@@ -36,6 +37,7 @@ app.use(globalLimiter);
 /* ------------------ ROUTES ------------------ */
 app.use("/api/auth", authRoutes);
 app.use("/api/interview", interviewRoutes);
+app.use("/api/resume", resumeRoutes);
 
 /* ------------------ HEALTH CHECK ------------------ */
 app.get("/api/health", (req, res) => {

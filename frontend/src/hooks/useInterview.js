@@ -58,7 +58,15 @@ const useInterview = () => {
 
       console.log("✅ BACKEND RESPONSE:", res.data);
 
-      dispatch(evaluationSuccess(res.data.feedback));
+// dispatch(evaluationSuccess(res.data.feedback));
+dispatch(
+  evaluationSuccess({
+    ...res.data.feedback,
+    autoSubmitted: res.data.meta?.autoSubmitted || false,
+  })
+);
+
+return res.data;   // 🔹 VERY IMPORTANT
     } catch (err) {
       console.error("❌ AXIOS ERROR:", err.response?.data || err.message);
 

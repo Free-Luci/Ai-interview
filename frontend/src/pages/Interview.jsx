@@ -3,6 +3,7 @@
 import useInterview from '../hooks/useInterview';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const questions = [
   "Explain your understanding of this role basics.",
@@ -15,6 +16,7 @@ const questions = [
 const Interview = () => {
   const role = "frontend";
   const topic = "Basics";
+const navigate = useNavigate();
 
   const [questionIndex, setQuestionIndex] = useState(0);
   const question = questions[questionIndex];
@@ -43,54 +45,69 @@ const Interview = () => {
   }, []);
 
   /* ---------------- SUBMIT FUNCTION ---------------- */
-  const handleSubmit = useCallback((auto = false, reason = null) => {
-    if (autoSubmittedRef.current || isSubmittingRef.current || answer.length < 20) return;
-    
-    isSubmittingRef.current = true;
-    
-    // Clear any pending auto-submit timers
-    cleanupTimers();
-    setShowLeaveWarning(false);
-    setLeaveCountdown(10);
-    
-    autoSubmittedRef.current = true;
-    
-    submitAnswer({
-      role,
-      topic,
-      question,
-      questionIndex,
-      answer,
-      autoSubmitted: auto,
-      autoSubmitReason: reason
-    }).finally(() => {
+ const handleSubmit = useCallback(async (auto = false, reason = null) => {
+  if (autoSubmittedRef.current || isSubmittingRef.current || answer.length < 20) return;
+
+  isSubmittingRef.current = true;
+
+  cleanupTimers();
+  setShowLeaveWarning(false);
+  setLeaveCountdown(10);
+
+  autoSubmittedRef.current = true;
+
+  const result = await submitAnswer({
+    role,
+    topic,
+    question,
+    questionIndex,
+    answer,
+    autoSubmitted: auto,
+    autoSubmitReason: reason
+  });
+
+  if (result?.interviewCompleted) {
+    toast.success("Interview completed! Redirecting to summary...");
+    setTimeout(() => {
+      window.location.href = "/interview/summary";
+    }, 1200);
+  }
+
       isSubmittingRef.current = false;
-    });
   }, [role, topic, question, questionIndex, answer, submitAnswer, cleanupTimers]);
 
   /* ---------------- COUNTDOWN FUNCTION ---------------- */
-  const startCountdown = useCallback(() => {
-    cleanupTimers(); // Clear any existing timers first
-    
-    setLeaveCountdown(10);
-    let count = 10;
-    
-    countdownIntervalRef.current = setInterval(() => {
-      count--;
-      console.log(`Countdown: ${count}`);
-      setLeaveCountdown(count);
-      
-      if (count <= 0) {
+const startCountdown = useCallback(() => {
+  cleanupTimers();
+
+  // Always reset UI first
+  setLeaveCountdown(10);
+  setShowLeaveWarning(true);
+
+  countdownIntervalRef.current = setInterval(() => {
+    setLeaveCountdown((prev) => {
+      console.log("⏱ Countdown:", prev - 1);
+
+      if (prev <= 1) {
+        // Time finished
         clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = null;
+
         if (!autoSubmittedRef.current) {
+          console.log("🚨 Auto submitting due to TAB SWITCH");
           handleSubmit(true, "TAB_SWITCH");
         }
+
         setShowLeaveWarning(false);
         isTabSwitchActiveRef.current = false;
+        return 0;
       }
-    }, 1000);
-  }, [cleanupTimers, handleSubmit]);
+
+      return prev - 1;
+    });
+  }, 1000);
+}, [cleanupTimers, handleSubmit]);
+
 
   /* ---------------- ANTI-CHEAT: PREVENT COPY/PASTE ---------------- */
   const handleAnswerChange = (e) => {
@@ -151,6 +168,22 @@ const Interview = () => {
       }
     }
   };
+
+  /* ================= AUTO REDIRECT TO SUMMARY ================= */
+useEffect(() => {
+  if (!feedback) return;
+
+  // If this was last question OR auto submitted → go to summary
+  const isLastQuestion = questionIndex === questions.length - 1;
+
+  if (isLastQuestion || feedback.autoSubmitted) {
+    toast.success("Interview completed! Redirecting to summary...");
+
+    setTimeout(() => {
+      navigate("/interview/summary");
+    }, 1200);
+  }
+}, [feedback]);
 
   /* ---------------- PREVENT COPY/PASTE EVENTS ---------------- */
   useEffect(() => {
@@ -219,7 +252,7 @@ const Interview = () => {
         // User switched away or minimized - start countdown
         console.log("Tab switched away - starting countdown");
         isTabSwitchActiveRef.current = true;
-        setShowLeaveWarning(true);
+        // setShowLeaveWarning(true);
         startCountdown();
       } else {
         // User returned - stop countdown if it was active
@@ -332,13 +365,20 @@ const Interview = () => {
     answerHistoryRef.current = [];
     resetInterview();
     
-    if (questionIndex < questions.length - 1) {
-      setQuestionIndex(prev => prev + 1);
-    } else {
-      toast.success("Interview completed! 🎉");
-    }
-  };
+ // LAST QUESTION → REDIRECT TO SUMMARY
+  if (questionIndex >= questions.length - 1) {
+    toast.success("Interview completed! Redirecting to summary... 🎉");
 
+    setTimeout(() => {
+      navigate("/interview/summary");
+    }, 1200);
+
+    return;
+  }
+
+  // ELSE NEXT QUESTION
+  setQuestionIndex(prev => prev + 1);
+};
   /* ---------------- HANDLE MODAL RETURN BUTTON ---------------- */
   const handleModalReturn = () => {
     console.log("Modal return button clicked");
@@ -497,29 +537,36 @@ const Interview = () => {
                 )}
               </div>
 
-              <button
-                className="
-                  w-full md:w-auto
-                  btn btn-primary btn-lg px-12 py-4 text-lg font-semibold rounded-xl
-                  hover:brightness-110 hover:scale-[1.04]
-                  active:scale-95
-                  focus:outline-none focus:ring-4 focus:ring-primary/40
-                  shadow-lg hover:shadow-xl
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-all duration-200
-                "
-                disabled={loading || answer.length < 20}
-                onClick={() => handleSubmit(false, null)}
-              >
-                {loading ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Submitting...
-                  </>
-                ) : (
-                  '🚀 Submit Answer'
-                )}
-              </button>
+<button
+  disabled={loading || answer.length < 20}
+  onClick={() => handleSubmit(false, null)}
+  className={`
+    w-full md:w-auto
+    btn btn-lg px-12 py-4 text-lg font-semibold rounded-xl
+    shadow-lg transition-all duration-200
+    focus:outline-none focus:ring-4
+
+    ${
+      loading
+        ? "bg-warning text-warning-content hover:bg-warning cursor-wait"
+        : answer.length < 20
+        ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+        : "btn-primary hover:brightness-110 hover:scale-[1.04] hover:shadow-xl"
+    }
+
+    active:scale-95
+  `}
+>
+  {loading ? (
+    <>
+      <span className="loading loading-spinner loading-sm mr-2"></span>
+      Submitting...
+    </>
+  ) : (
+    "🚀 Submit Answer"
+  )}
+</button>
+
             </div>
           </div>
         </div>
@@ -754,8 +801,14 @@ const Interview = () => {
           </div>
         </div>
       )}
+      <button
+  className="btn btn-info btn-lg mt-6"
+  onClick={() => navigate("/interview/summary")}
+>
+  📊 View Interview Summary
+</button>
+
     </div>
   );
 };
-
 export default Interview;

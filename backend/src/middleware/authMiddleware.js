@@ -5,14 +5,14 @@ const protect = (req, res, next) => {
   let token;
 
   /* -----------------------------------------
-     1️⃣ Try JWT from cookie (PRIMARY)
+     Try JWT from cookie (PRIMARY)
   ------------------------------------------*/
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
   }
 
   /* -----------------------------------------
-     2️⃣ Fallback: Authorization header
+     Fallback: Authorization header
   ------------------------------------------*/
   if (
     !token &&
@@ -23,14 +23,14 @@ const protect = (req, res, next) => {
   }
 
   /* -----------------------------------------
-     3️⃣ No token found
+      No token found
   ------------------------------------------*/
   if (!token) {
     return next(new AppError("Not authorized, token missing", 401));
   }
 
   /* -----------------------------------------
-     4️⃣ Verify token
+     Verify token
   ------------------------------------------*/
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
