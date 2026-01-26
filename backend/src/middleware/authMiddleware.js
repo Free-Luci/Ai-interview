@@ -46,4 +46,7 @@ const protect = (req, res, next) => {
   }
 };
 
+router.get("/me", protect, getProfile);
+
+
 export default protect;
