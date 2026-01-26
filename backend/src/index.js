@@ -23,7 +23,8 @@ app.use(cookieParser());
 /* ------------------ MIDDLEWARE ------------------ */
 app.use(
   cors({
-    origin: "http://localhost:5173", // ✅ EXACT frontend origin
+    origin:[ "http://localhost:5173",
+      "https://ai-interview-one-eta.vercel.app"], // ✅ EXACT frontend origin
     credentials: true,               // ✅ REQUIRED for cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
