@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { loginSuccess } from "../store/authSlice";
+import API from "../util/AxiosInstance";
 
 import AuthLayout from "../components/Auth/AuthLayout";
 import FloatingImage from "../components/Auth/FloatingImage";
@@ -42,20 +43,19 @@ const Login = () => {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+const res = await API.post("/auth/login", {
+  email,
+  password,
+});
 
-      dispatch(loginSuccess(data));
-      toast.success("Logged in successfully!");
-      navigate("/dashboard");
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
+dispatch(loginSuccess(res.data));
+toast.success("Logged in successfully!");
+navigate("/dashboard");
+
+} catch (err) {
+  toast.error(err.response?.data?.message || err.message);
+}
+ finally {
       setLoading(false);
     }
   };

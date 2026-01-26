@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import API from "../util/AxiosInstance";
 
 import { useSelector } from "react-redux";
 
@@ -43,20 +44,17 @@ const Signup = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed");
-
+const res = await API.post("/auth/signup", {
+  name,
+  email,
+  password,
+});
       toast.success("Account created! Please login.");
       navigate("/login");
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
+} catch (err) {
+  toast.error(err.response?.data?.message || err.message);
+}
+ finally {
       setLoading(false);
     }
   };
