@@ -1,10 +1,10 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch , useSelector} from "react-redux";
+import { Routes, Route, Navigate } from "react-router-dom";
+
 import { checkAuth } from "./store/authActions";
 
-import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -35,9 +35,7 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
   // IMPORTANT: WAIT UNTIL AUTH CHECK FINISHES
-  if (loading) {
-    return null; // or spinner / splash screen
-  }
+  if (loading)    return null; // or spinner / splash screen
   
   return (
     <div data-theme={theme} className="min-h-screen">
@@ -45,15 +43,18 @@ function App() {
 
         {/* PUBLIC pages */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Landing />} /> </Route>
+          <Route path="/" element={<Landing />} /> 
+          {/* </Route> */}
           <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
+            </Route>
 
         <Route
           path="/login"
           element={
+            <PublicRoute>
               <Login />
-          }
-        />
+            </PublicRoute>
+          }/>
 
         <Route
           path="/signup"
@@ -71,7 +72,7 @@ function App() {
               <AppLayout />
             </ProtectedRoute>
           }
-        >
+              >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interview" element={<Interview />} />
           <Route path="/interview/summary" element={<InterviewSummary />} />

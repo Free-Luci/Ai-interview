@@ -2,7 +2,6 @@
 import axios from "axios";
 
 const instance = axios.create({
-  // baseURL:["http://localhost:5000" , "https://ai-interview-backend-uof6.onrender.com/api"],
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });

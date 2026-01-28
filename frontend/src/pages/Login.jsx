@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { loginSuccess } from "../store/authSlice";
-import API from "../util/AxiosInstance";
+import API from "../utils/axiosInstance";
 
 import AuthLayout from "../components/Auth/AuthLayout";
 import FloatingImage from "../components/Auth/FloatingImage";

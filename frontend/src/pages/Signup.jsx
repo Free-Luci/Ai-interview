@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
-import API from "../util/AxiosInstance";
+import API from "../utils/axiosInstance";
 
 import { useSelector } from "react-redux";
 
