@@ -63,17 +63,9 @@ export const signin = async (req, res, next) => {
       { expiresIn: "7d" }
     );
 
-       // 🔐 SET TOKEN IN SECURE COOKIE (PRODUCTION)
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,        // REQUIRED on HTTPS (Vercel + Render)
-      sameSite: "none",   // REQUIRED for cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    res.status(200).json({
+    res.json({
       success: true,
-      message: "Login successful",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -84,28 +76,3 @@ export const signin = async (req, res, next) => {
     next(error);
   }
 };
-//     res.json({
-//       success: true,
-//       token,
-//       user: {
-//         id: user._id,
-//         name: user.name,
-//         email: user.email
-//       }
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-//-----------------LOGOUT------------------
-export const logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
-
-  res.status(200).json({ success: true, message: "Logged out" });
-};
-router.post("/logout", logout);
